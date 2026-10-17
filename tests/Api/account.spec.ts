@@ -1,4 +1,4 @@
-import {test, expect} from "@playwright/test";
+import {test, expect, request} from "@playwright/test";
 import { faker, Faker } from "@faker-js/faker";
 
 test.describe('API - Account', () => {
@@ -87,6 +87,17 @@ test.describe('API - Account', () => {
         
 
     });
+
+    test("Creacion de Usuario sin campos obligatorios 'Status 400'", async ({ request }) => {
+        const form={
+            name:"test",
+            email:faker.internet.email()
+        } 
+        const solicitud= await request.post("/api/createAccount", {form})
+        const res= JSON.parse(await solicitud.text())    
+        expect (res.responseCode).toBe(400)    
+    });
+    
 
     
 });
