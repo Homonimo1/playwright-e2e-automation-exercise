@@ -1,10 +1,11 @@
-import { Locator, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 
 export class ProductsPage {
   readonly page: Page;
   readonly productCards: Locator;
   readonly continueShoppingButton: Locator;
   readonly viewCartLink: Locator;
+ 
 
   constructor(page: Page) {
     this.page = page;
@@ -13,6 +14,7 @@ export class ProductsPage {
       name: "Continue Shopping",
     });
     this.viewCartLink = page.getByRole("link", { name: "View Cart" });
+    
   }
 
   async goto() {

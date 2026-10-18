@@ -1,6 +1,7 @@
 import { LoginPage } from "../Page/login";
 import { ProductsPage } from "../Page/productsPage";
 import { CartPage } from "../Page/cartPage";
+import { CheckoutPage } from "../Page/pageCheckout";
 
 import { test as base, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
@@ -16,6 +17,8 @@ type MisFixtures = {
   usuarioCreado: Usuario;
   productsPage: ProductsPage;
   cartPage: CartPage;
+  checkoutPage:CheckoutPage
+  
 };
 
 export const test = base.extend<MisFixtures>({
@@ -59,13 +62,15 @@ export const test = base.extend<MisFixtures>({
     await use(usuario);
 
     // TEARDOWN: BORRAR USUARIO
-    const deleteRes = await request.delete("/api/deleteAccount", {
+       const deleteRes = await request.delete("/api/deleteAccount", {
       form: {
         email: usuario.email,
         password: usuario.password,
-      },
+       },
     });
-    expect(deleteRes.ok()).toBeTruthy();
+    const info= JSON.parse(await deleteRes.text());
+    expect(info.responseCode).toBe(200)
+    
   },
 
   productsPage: async ({ page }, use) => {
@@ -77,6 +82,12 @@ export const test = base.extend<MisFixtures>({
     const cartPage = new CartPage(page);
     await use(cartPage);
   },
+
+  checkoutPage: async({page},use)=>{
+    const checkoutPage= new CheckoutPage(page);
+    await use(checkoutPage);
+  }
+
 });
 
 export { expect };

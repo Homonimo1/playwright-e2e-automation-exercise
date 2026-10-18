@@ -1,5 +1,5 @@
 import {test, expect} from  "../../fixtures"
-test.describe("Interaccion con pagina de productos", () => {
+test.describe("Interacción con página de productos", () => {
   test("Agregar productos al carrito", async ({
     loginPage,
     cartPage,
@@ -25,4 +25,10 @@ test.describe("Interaccion con pagina de productos", () => {
       await cartPage.expectProductCount(3);
     });
   });
+
+  
+
+
+
 });
+

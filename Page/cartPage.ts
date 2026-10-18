@@ -4,12 +4,16 @@ export class CartPage{
 
     readonly page:Page;
     readonly cartRows: Locator;
+    readonly proceedToCheckOutButton: Locator;
+  
 
 
     constructor(page:Page){
 
         this.page= page;
         this.cartRows= page.locator('#cart_info_table tbody tr')
+        this.proceedToCheckOutButton= this.page.getByRole("link",{name:'Proceed To Checkout'})
+
     };
 
     async goto(){
@@ -20,5 +24,9 @@ export class CartPage{
         await expect(this.cartRows).toHaveCount(count);
 
     };
+
+    async proceedToCheckout(){
+        await this.proceedToCheckOutButton.click()
+    }
 
 };

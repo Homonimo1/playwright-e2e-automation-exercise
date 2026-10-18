@@ -1,7 +1,7 @@
 import {test,expect} from "../../fixtures";
 
-test.describe('Validacion de usuarios por API', () => {
-    test('Login de User por API', async ({ request, usuarioCreado }) => {
+test.describe('Validación de usuarios por API', () => {
+    test('Login de usuario por API', async ({ request, usuarioCreado }) => {
         const response= await request.post("/api/verifyLogin",{
             form:{
                 email:usuarioCreado.email,
@@ -13,8 +13,8 @@ test.describe('Validacion de usuarios por API', () => {
         
     })
 
-    test('Login con datos invalidos/vacios', async ({ request, usuarioCreado }) => {
-        await test.step('Validacion con constraseña incorrecta', async () => {
+    test('Login con datos inválidos/vacíos', async ({ request, usuarioCreado }) => {
+        await test.step('Validación con contraseña incorrecta', async () => {
             const solicitud= await request.post("/api/verifyLogin", {form:{
                 email: usuarioCreado.email,
                 password: "Clave incorrecta"
@@ -24,7 +24,7 @@ test.describe('Validacion de usuarios por API', () => {
             expect (body.responseCode).toBe(404)
             
         });
-        await test.step('Validacion con contraseña vacia', async () => {
+        await test.step('Validación con contraseña vacía', async () => {
             const solicitud= await request.post("/api/verifyLogin", {form:
                 {
                     email: usuarioCreado.email
@@ -36,7 +36,7 @@ test.describe('Validacion de usuarios por API', () => {
             
         });
         
-        await test.step('Validacion email invalido', async () => {
+        await test.step('Validación email inválido', async () => {
             const solicitud= await request.post("/api/verifyLogin",{form:{
                 email: "EmailInvalido",
                 password: usuarioCreado.password
@@ -47,7 +47,7 @@ test.describe('Validacion de usuarios por API', () => {
 
         });
 
-        await test.step('Validacion email vacio', async () => {
+        await test.step('Validación email vacío', async () => {
             const solicitud= await request.post("/api/verifyLogin",{form:
                 {
                     password: usuarioCreado.password

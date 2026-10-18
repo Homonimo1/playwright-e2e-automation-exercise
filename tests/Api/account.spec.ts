@@ -1,8 +1,8 @@
 import {test, expect, request} from "@playwright/test";
-import { faker, Faker } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 
 test.describe('API - Account', () => {
-    test('Creaccion de cuenta con datos validos @smoke', async ({ request }) => {
+    test('Creación de cuenta con datos válidos @smoke', async ({ request }) => {
         const email= faker.internet.email()
         const password= faker.internet.password()    
         
@@ -36,7 +36,7 @@ test.describe('API - Account', () => {
                 
     });
 
-     test('Verificacion creacion de usuario Duplicado', async ({ request }) => {
+     test('Verificación de creación de usuario duplicado', async ({ request }) => {
         const email= faker.internet.email()
         const password= faker.internet.password()    
         
@@ -60,9 +60,9 @@ test.describe('API - Account', () => {
             mobile_number: "3202245566",
         }
 
-        //Creacion de usuario nuevo
+        // Creación de usuario nuevo
 
-        await test.step('Crear User #1', async () => {
+        await test.step('Crear usuario #1', async () => {
         const response= await request.post("/api/createAccount",{form});
         const first= JSON.parse(await response.text());
         expect (first.responseCode).toBe(201)    
@@ -71,7 +71,7 @@ test.describe('API - Account', () => {
         
 
         //Crear usuario duplicado
-        await test.step('Crear User#2', async () => {
+        await test.step('Crear usuario duplicado', async () => {
         const response2= await request.post("/api/createAccount",{form})
         const second= JSON.parse(await response2.text());
         expect (second.responseCode).toBe(400) 
@@ -80,7 +80,7 @@ test.describe('API - Account', () => {
                 
         //Limpieza de datos
 
-        await test.step('Eliminacion/Limpueza de Usuario', async () => {
+        await test.step('Eliminación/limpieza de usuario', async () => {
             await request.delete("/api/deleteAccount",{form:{email,password}})
 
         });
@@ -88,7 +88,7 @@ test.describe('API - Account', () => {
 
     });
 
-    test("Creacion de Usuario sin campos obligatorios 'Status 400'", async ({ request }) => {
+    test("Creación de usuario sin campos obligatorios (Status 400)", async ({ request }) => {
         const form={
             name:"test",
             email:faker.internet.email()

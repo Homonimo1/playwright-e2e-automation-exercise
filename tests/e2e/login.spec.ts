@@ -1,12 +1,12 @@
 import { test, expect } from "../../fixtures";
 
 test.describe("Login page", () => {
-  test("Muestra error con las credenciales invalidas @smoke", async ({loginPage,}) => {
+  test("Muestra error con las credenciales inválidas @smoke", async ({ loginPage }) => {
     await loginPage.login("invalidEmail@gmail.com", "InvalidPass");
     await loginPage.expectLoginError();
   });
 
-  test("No permite enviar formulario con campos vacios", async ({
+  test("No permite enviar formulario con campos vacíos", async ({
     loginPage,
     page,
   }) => {
