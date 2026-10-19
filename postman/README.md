@@ -59,6 +59,12 @@ npm install -g newman
 newman run postman/collection.json -e postman/environment.json
 ```
 
+### Continuous integration
+
+`.github/workflows/postman.yml` runs the suite with Newman on every push and pull request to
+`main`/`master`, and can also be triggered manually from the **Actions** tab. The JSON report is
+uploaded as a build artifact named `newman-report`.
+
 ## Coverage summary
 
 - Authentication (success) and token chaining.
