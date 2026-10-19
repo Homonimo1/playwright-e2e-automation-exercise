@@ -32,6 +32,8 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     baseURL: process.env.BASE_URL || 'https://automationexercise.com',
+    /* The site exposes its hooks as data-qa, not Playwright's default data-testid. */
+    testIdAttribute: 'data-qa',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video:'retain-on-failure'
