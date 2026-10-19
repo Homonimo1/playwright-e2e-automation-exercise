@@ -1,4 +1,4 @@
-import {test, expect, request} from "@playwright/test";
+import {test, expect} from "@playwright/test";
 import { faker } from "@faker-js/faker";
 
 test.describe('API - Account', () => {
