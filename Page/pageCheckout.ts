@@ -12,8 +12,8 @@ export class CheckoutPage{
         this.page= page;
         this.addressDetail= this.page.getByRole("heading",{name:"Address Details"});
         this.placeOrderButton= this.page.getByRole('link', { name: 'Place Order' });
-        this.textAreaComment= this.page.locator("#ordermsg").getByRole("textbox",{name:"message"});
-        this.cartRows= this.page.locator("#cart_info tbody tr");
+        this.textAreaComment= this.page.locator("#ordermsg").getByRole("textbox");
+        this.cartRows= this.page.locator("#cart_info tbody tr:has(td.cart_description)");
     };
     
     async goToCheckout(){

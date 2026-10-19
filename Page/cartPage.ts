@@ -12,7 +12,8 @@ export class CartPage{
 
         this.page= page;
         this.cartRows= page.locator('#cart_info_table tbody tr')
-        this.proceedToCheckOutButton= this.page.getByRole("link",{name:'Proceed To Checkout'})
+        this.proceedToCheckOutButton= this.page.getByText('Proceed To Checkout');
+
 
     };
 
