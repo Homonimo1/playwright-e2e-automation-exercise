@@ -7,7 +7,7 @@
 
 UI and API test automation for [automationexercise.com](https://automationexercise.com), built with Playwright and TypeScript.
 
-The suite covers the full purchase journey: user lifecycle (create, log in, delete), product search, shopping cart, checkout, payment with a card, and order confirmation. Test users are created and removed through the site API, so every test runs with its own data and leaves no residue.
+The suite covers the full purchase journey: user lifecycle (create, log in, delete), shopping cart, checkout, payment with a card, and order confirmation. Test users are created and removed through the site API, so every test runs with its own data and leaves no residue.
 
 ## Stack
 
@@ -39,6 +39,9 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 ├── .github/workflows/playwright.yml
 ├── data/
 │   └── userFactory.ts
+├── docs/
+│   ├── bug-reports.md
+│   └── test-plan.md
 ├── pages/
 │   ├── cart.page.ts
 │   ├── checkout.page.ts
@@ -76,7 +79,12 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 | E2E · Checkout | `tests/e2e/checkout.spec.ts` | Log in, add a product, proceed to checkout, verify address details and product count, add a comment, place the order |
 | E2E · Payment  | `tests/e2e/payment.spec.ts`  | Complete the checkout, pay with a valid card, verify the order confirmation and return to the home page              |
 
-All 11 tests pass locally against the public site (verified with a serial run).
+All 11 tests (14 scenarios across 6 files) pass against the public site, and the same suite runs green in CI.
+
+## Documentation
+
+- [Test plan](docs/test-plan.md) — objective, scope, strategy, coverage matrix with scenario IDs, entry and exit criteria, and risks.
+- [Defect log](docs/bug-reports.md) — confirmed defects with reproduction steps and evidence, plus the reporting template.
 
 ## Getting started
 
