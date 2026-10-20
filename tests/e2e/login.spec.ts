@@ -1,21 +1,18 @@
-import { test, expect } from "../../fixtures";
+import { test, expect } from '../../fixtures';
 
-test.describe("Login page", () => {
-  test("Muestra error con las credenciales inválidas @smoke", async ({ loginPage }) => {
-    await loginPage.login("invalidEmail@gmail.com", "InvalidPass");
+test.describe('Login page', () => {
+  test('shows an error with invalid credentials @smoke', async ({ loginPage }) => {
+    await loginPage.login('invalidEmail@gmail.com', 'InvalidPass');
     await loginPage.expectLoginError();
   });
 
-  test("No permite enviar formulario con campos vacíos", async ({
-    loginPage,
-    page,
-  }) => {
+  test('blocks the form when both fields are empty', async ({ loginPage, page }) => {
     await loginPage.loginButton.click();
     await expect(page).toHaveURL(/login/);
   });
 
-  test("Login exitoso @smoke", async ({ loginPage, usuarioCreado }) => {
-    await loginPage.login(usuarioCreado.email, usuarioCreado.password);
-    await expect(loginPage.loggedInLabel).toBeVisible();
+  test('logs in with a valid user @smoke', async ({ loginPage, createdUser }) => {
+    await loginPage.login(createdUser.email, createdUser.password);
+    await loginPage.expectLoggedIn();
   });
 });

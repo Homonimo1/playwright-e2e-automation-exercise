@@ -1,34 +1,29 @@
-import {test, expect} from  "../../fixtures"
-test.describe("Interacción con página de productos", () => {
-  test("Agregar productos al carrito", async ({
+import { test } from '../../fixtures';
+
+test.describe('Products page', () => {
+  test('adds three products to the cart', async ({
     loginPage,
     cartPage,
     productsPage,
-    usuarioCreado,
+    createdUser,
   }) => {
-    await test.step("Login con usuario creado", async () => {
-      await loginPage.login(usuarioCreado.email, usuarioCreado.password);
-      await expect(loginPage.loggedInLabel).toBeVisible();
+    await test.step('log in with the created user', async () => {
+      await loginPage.login(createdUser.email, createdUser.password);
+      await loginPage.expectLoggedIn();
     });
 
-    await test.step("Agregar tres productos al carrito", async () => {
+    await test.step('add three products to the cart', async () => {
       await productsPage.goto();
       await productsPage.addProductToCart(0);
-      await productsPage.continueShoppingButton.click();
+      await productsPage.continueShopping();
       await productsPage.addProductToCart(1);
-      await productsPage.continueShoppingButton.click();
-      await productsPage.addProductForName("Winter Top")
+      await productsPage.continueShopping();
+      await productsPage.addProductByName('Winter Top');
       await productsPage.goToCart();
     });
 
-    await test.step("Validar cantidad en carrito", async () => {
+    await test.step('verify the cart count', async () => {
       await cartPage.expectProductCount(3);
     });
   });
-
-  
-
-
-
 });
-
