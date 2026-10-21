@@ -79,7 +79,7 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 | E2E · Checkout | `tests/e2e/checkout.spec.ts` | Log in, add a product, proceed to checkout, verify address details and product count, add a comment, place the order |
 | E2E · Payment  | `tests/e2e/payment.spec.ts`  | Complete the checkout, pay with a valid card, verify the order confirmation and return to the home page              |
 
-The current local suite contains 14 tests across 6 files. A local run passed all 14 tests against the public site after the latest test changes. The latest successful GitHub Actions run visible during review is for commit `c022f3e`; it predates the current unpushed local changes. CI runs the suite on pushes and pull requests.
+The suite contains 14 tests across 6 files. A local run passed all 14 tests against the public site, and GitHub Actions passed for commit `c025984`. CI runs the suite on pushes and pull requests.
 
 ## Documentation
 
