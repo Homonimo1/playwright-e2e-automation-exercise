@@ -7,7 +7,7 @@
 
 UI and API test automation for [automationexercise.com](https://automationexercise.com), built with Playwright and TypeScript.
 
-The suite covers the full purchase journey: user lifecycle (create, log in, delete), shopping cart, checkout, payment with a card, and order confirmation. Test users are created and removed through the site API, so every test runs with its own data and leaves no residue.
+The suite covers the full purchase journey: user lifecycle (create, log in, delete), shopping cart, checkout, payment with a card, and order confirmation. Tests create unique users through the site API and attempt cleanup after each test, including when test assertions fail. Cleanup depends on the availability of this public third-party API and cannot be guaranteed during an outage.
 
 ## Stack
 
@@ -24,7 +24,7 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 
 - Page Object Model with one class per page.
 - Custom fixtures that wrap page objects and expose a disposable test user.
-- API setup and teardown: `createAccount` before the test, `deleteAccount` after it.
+- API setup and teardown: `createAccount` before the test, `deleteAccount` in cleanup logic after it, including after test failures. Cleanup depends on the public API being available.
 - One user factory (`data/userFactory.ts`) shared by fixtures and API specs, so the account payload is defined once.
 - Unique test data generated with `@faker-js/faker`.
 - UI and API suites in the same project, sharing `baseURL` and configuration.
@@ -75,11 +75,11 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 | API · Account  | `tests/Api/account.spec.ts`  | Create account with valid data (201), reject duplicate email (400), reject missing required fields (400)             |
 | API · Login    | `tests/Api/loginApi.spec.ts` | Verify login (200), wrong password (404), missing password (400), invalid email (404), missing email (400)           |
 | E2E · Login    | `tests/e2e/login.spec.ts`    | Invalid credentials show an error, empty form is blocked, valid user logs in                                         |
-| E2E · Cart     | `tests/e2e/cart.spec.ts`     | Log in, add three products (two by position, one by name), verify the cart count                                     |
+| E2E · Cart     | `tests/e2e/cart.spec.ts`     | Log in, add three products selected by name, verify the cart count and product identities                            |
 | E2E · Checkout | `tests/e2e/checkout.spec.ts` | Log in, add a product, proceed to checkout, verify address details and product count, add a comment, place the order |
 | E2E · Payment  | `tests/e2e/payment.spec.ts`  | Complete the checkout, pay with a valid card, verify the order confirmation and return to the home page              |
 
-All 11 tests (14 scenarios across 6 files) pass against the public site, and the same suite runs green in CI.
+The current local suite contains 14 tests across 6 files. A local run passed all 14 tests against the public site after the latest test changes. The latest successful GitHub Actions run visible during review is for commit `c022f3e`; it predates the current unpushed local changes. CI runs the suite on pushes and pull requests.
 
 ## Documentation
 

@@ -14,16 +14,17 @@ test.describe('Products page', () => {
 
     await test.step('add three products to the cart', async () => {
       await productsPage.goto();
-      await productsPage.addProductToCart(0);
+      await productsPage.addProductByName('Blue Top');
       await productsPage.continueShopping();
-      await productsPage.addProductToCart(1);
+      await productsPage.addProductByName('Men  Tshirt');
       await productsPage.continueShopping();
       await productsPage.addProductByName('Winter Top');
       await productsPage.goToCart();
     });
 
-    await test.step('verify the cart count', async () => {
+    await test.step('verify the cart count and selected products', async () => {
       await cartPage.expectProductCount(3);
+      await cartPage.expectProducts(['Blue Top', 'Men  Tshirt', 'Winter Top']);
     });
   });
 });

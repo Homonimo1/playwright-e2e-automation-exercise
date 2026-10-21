@@ -53,14 +53,29 @@ export const test = base.extend<Fixtures>({
     const createBody = (await createResponse.json()) as { responseCode: number };
     expect(createBody.responseCode).toBe(201);
 
-    await use(user);
+    let testError: unknown;
+    try {
+      await use(user);
+    } catch (error) {
+      testError = error;
+    }
 
-    // Teardown: delete the user even if the test failed.
-    const deleteResponse = await request.delete('/api/deleteAccount', {
-      form: { email: user.email, password: user.password },
-    });
-    const deleteBody = JSON.parse(await deleteResponse.text()) as { responseCode: number };
-    expect(deleteBody.responseCode).toBe(200);
+    // Always attempt cleanup after the test, including when its assertions fail.
+    try {
+      const deleteResponse = await request.delete('/api/deleteAccount', {
+        form: { email: user.email, password: user.password },
+      });
+      const deleteBody = (await deleteResponse.json()) as { responseCode: number };
+      expect(deleteBody.responseCode).toBe(200);
+    } catch (cleanupError) {
+      if (testError) {
+        console.error('User cleanup also failed after the test failed:', cleanupError);
+        throw testError;
+      }
+      throw cleanupError;
+    }
+
+    if (testError) throw testError;
   },
 });
 

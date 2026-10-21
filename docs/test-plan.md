@@ -26,7 +26,7 @@ and repeatable in CI.
 | Account (API)     | Creation with valid data, duplicate email rejection, missing required fields |
 | Login (API)       | Valid login, wrong password, missing password, invalid email, missing email  |
 | Login (UI)        | Error on invalid credentials, empty form blocked, valid login                |
-| Products and cart | Adding three products (two by position, one by name) and the cart counter    |
+| Products and cart | Adding three products selected by name, validating cart count and identities |
 | Checkout          | Delivery address and product count, comment field, order placement           |
 | Payment           | Card form, order confirmation URL and marker, return to the home page        |
 
@@ -46,9 +46,10 @@ and repeatable in CI.
   while low-risk static pages are ignored.
 - **Two levels:** API tests for account and authentication contracts; UI tests for the journeys
   that only exist in the browser.
-- **API for setup and teardown:** test users are created through `/api/createAccount` before the
-  test and removed through `/api/deleteAccount` after it, so UI tests do not depend on
-  registration forms and leave no residue.
+- **API for setup and cleanup:** test users are created through `/api/createAccount` before the
+  test and cleanup is attempted through `/api/deleteAccount` after it, including when assertions
+  fail. Cleanup depends on the availability of the public third-party API, so residual data cannot
+  be ruled out during an outage.
 - **Behaviour over selectors:** specs describe user steps; locators live in page objects and
   assertions live in `verify*` methods, so a selector change touches one file.
 - **Tagged smoke set:** `@smoke` marks the happy paths that must always pass, enabling a fast
@@ -70,8 +71,9 @@ The API base URL is the same `baseURL` used by the UI tests.
   account shape is defined once.
 - Every run generates unique data with `@faker-js/faker` to avoid collisions on a shared public
   site.
-- Cleanup is part of the fixture lifecycle: a failed test can leave an account behind, and the next
-  run simply creates a new one with a different email.
+- Cleanup runs after the test even when its assertions fail. Because the API is a shared public
+  service, cleanup can itself fail during an outage; the failure is reported and the test's original
+  error is preserved when both fail.
 
 ## 6. Coverage matrix
 
@@ -92,9 +94,9 @@ The API base URL is the same `baseURL` used by the UI tests.
 | UI-CHK-01    | E2E · Checkout | Places an order after filling the checkout form | `tests/e2e/checkout.spec.ts` | `@smoke` |
 | UI-PAY-01    | E2E · Payment  | Pays with a valid card and confirms the order   | `tests/e2e/payment.spec.ts`  | `@smoke` |
 
-Totals: **11 automated tests**, **14 scenarios** and **5 smoke scenarios**. `API-LOG-02.x` are
-assertions grouped with `test.step` inside a single test, which is why they outnumber the test
-functions.
+Totals: **14 automated tests**, **14 scenarios** and **5 smoke scenarios**. Each API login scenario
+is an independent test, so a failure in one credential case does not prevent the other cases from
+running.
 
 ## 7. Entry and exit criteria
 
@@ -107,20 +109,21 @@ functions.
 **Exit**
 
 - `pnpm typecheck` and `pnpm format:check` pass.
-- 11 of 11 tests pass in CI and the HTML report is uploaded.
+- 14 of 14 tests pass in CI and the HTML report is uploaded. A local pass does not confirm the
+  status of CI for unpushed changes.
 - No open defect of severity High or Medium that blocks the money path.
 - Any accepted limitation is written in `README.md` and in §8 of this document.
 
 ## 8. Risks and mitigations
 
-| Risk                                        | Impact                                | Mitigation                                                    |
-| ------------------------------------------- | ------------------------------------- | ------------------------------------------------------------- |
-| Live third-party site, no control over data | Intermittent failures from latency    | 2 retries and 1 worker in CI; `--workers=1` locally if needed |
-| Shared public environment                   | Account collisions, dirty state       | Unique faker data and API cleanup after each test             |
-| Single browser enabled                      | Browser-specific defects go unnoticed | Documented limitation; Firefox and WebKit ready to enable     |
-| API answers HTTP 200 for every outcome      | Status codes are not trustworthy      | Assertions read `responseCode` from the body (see BUG-001)    |
-| DOM hooks are not guaranteed                | Selector breakage on redesign         | `data-qa` via `testIdAttribute` plus role-based locators      |
-| Payment is simulated                        | No real transaction validation        | Documented as out of scope                                    |
+| Risk                                        | Impact                                | Mitigation                                                                                |
+| ------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Live third-party site, no control over data | Intermittent failures from latency    | 2 retries and 1 worker in CI; `--workers=1` locally if needed                             |
+| Shared public environment                   | Account collisions, dirty state       | Unique faker data; cleanup attempted after each test; API outages can leave residual data |
+| Single browser enabled                      | Browser-specific defects go unnoticed | Documented limitation; Firefox and WebKit ready to enable                                 |
+| API answers HTTP 200 for every outcome      | Status codes are not trustworthy      | Assertions read `responseCode` from the body (see BUG-001)                                |
+| DOM hooks are not guaranteed                | Selector breakage on redesign         | `data-qa` via `testIdAttribute` plus role-based locators                                  |
+| Payment is simulated                        | No real transaction validation        | Documented as out of scope                                                                |
 
 ## 9. Backlog
 

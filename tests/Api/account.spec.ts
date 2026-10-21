@@ -6,35 +6,20 @@ test.describe('API - Account', () => {
   test('creates an account with valid data @smoke', async ({ request }) => {
     const user = buildUser();
 
-    const response = await request.post('/api/createAccount', {
-      form: buildUserForm(user),
-    });
-    const body = JSON.parse(await response.text()) as { responseCode: number };
-    expect(body.responseCode).toBe(201);
-
-    await request.delete('/api/deleteAccount', {
-      form: { email: user.email, password: user.password },
+    await withCreatedAccount(request, user, async (body) => {
+      expect(body.responseCode).toBe(201);
     });
   });
 
   test('rejects a duplicate email', async ({ request }) => {
-    const form = buildUserForm(buildUser());
+    const user = buildUser();
+    const form = buildUserForm(user);
 
-    await test.step('create the first user', async () => {
-      const response = await request.post('/api/createAccount', { form });
-      const body = JSON.parse(await response.text()) as { responseCode: number };
-      expect(body.responseCode).toBe(201);
-    });
-
-    await test.step('try to create the same user again', async () => {
-      const response = await request.post('/api/createAccount', { form });
-      const body = JSON.parse(await response.text()) as { responseCode: number };
-      expect(body.responseCode).toBe(400);
-    });
-
-    await test.step('delete the user', async () => {
-      await request.delete('/api/deleteAccount', {
-        form: { email: form.email, password: form.password },
+    await withCreatedAccount(request, user, async () => {
+      await test.step('try to create the same user again', async () => {
+        const response = await request.post('/api/createAccount', { form });
+        const body = (await response.json()) as { responseCode: number };
+        expect(body.responseCode).toBe(400);
       });
     });
   });
@@ -50,3 +35,38 @@ test.describe('API - Account', () => {
     expect(body.responseCode).toBe(400);
   });
 });
+
+async function withCreatedAccount(
+  request: import('@playwright/test').APIRequestContext,
+  user: ReturnType<typeof buildUser>,
+  runTest: (createdBody: { responseCode: number }) => Promise<void>,
+): Promise<void> {
+  const createResponse = await request.post('/api/createAccount', {
+    form: buildUserForm(user),
+  });
+  const createBody = (await createResponse.json()) as { responseCode: number };
+  expect(createBody.responseCode).toBe(201);
+
+  let testError: unknown;
+  try {
+    await runTest(createBody);
+  } catch (error) {
+    testError = error;
+  }
+
+  try {
+    const deleteResponse = await request.delete('/api/deleteAccount', {
+      form: { email: user.email, password: user.password },
+    });
+    const deleteBody = (await deleteResponse.json()) as { responseCode: number };
+    expect(deleteBody.responseCode).toBe(200);
+  } catch (cleanupError) {
+    if (testError) {
+      console.error('Account cleanup also failed after the test failed:', cleanupError);
+      throw testError;
+    }
+    throw cleanupError;
+  }
+
+  if (testError) throw testError;
+}

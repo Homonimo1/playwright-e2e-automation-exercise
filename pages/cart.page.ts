@@ -19,6 +19,12 @@ export class CartPage {
     await expect(this.cartRows).toHaveCount(count);
   }
 
+  async expectProducts(names: string[]) {
+    for (const name of names) {
+      await expect(this.cartRows.filter({ hasText: name })).toHaveCount(1);
+    }
+  }
+
   async proceedToCheckout() {
     await this.proceedToCheckoutButton.click();
   }

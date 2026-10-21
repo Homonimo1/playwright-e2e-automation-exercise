@@ -6,9 +6,19 @@ test.describe('Login page', () => {
     await loginPage.expectLoginError();
   });
 
-  test('blocks the form when both fields are empty', async ({ loginPage, page }) => {
+  test('blocks the form when both fields are empty', async ({ loginPage }) => {
     await loginPage.loginButton.click();
-    await expect(page).toHaveURL(/login/);
+
+    await expect
+      .poll(() =>
+        loginPage.emailInput.evaluate((input: HTMLInputElement) => input.validity.valueMissing),
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        loginPage.passwordInput.evaluate((input: HTMLInputElement) => input.validity.valueMissing),
+      )
+      .toBe(true);
   });
 
   test('logs in with a valid user @smoke', async ({ loginPage, createdUser }) => {

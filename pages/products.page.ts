@@ -25,6 +25,11 @@ export class ProductsPage {
 
   async addProductByName(name: string) {
     const card = this.productCards.filter({ hasText: name });
+    const matchingCards = await card.count();
+    if (matchingCards !== 1) {
+      throw new Error(`Expected exactly one product card matching "${name}".`);
+    }
+    await card.waitFor({ state: 'visible' });
     await card.hover();
     await card.locator('.overlay-content .add-to-cart').click();
   }
