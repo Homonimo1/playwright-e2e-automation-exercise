@@ -3,26 +3,28 @@
 Defects found while building and running this suite. Only findings that were reproduced against
 the live site are listed; nothing here is reported from reading code alone.
 
-| ID      | Title                                  | Severity | Priority | Status         | Reported   |
-| ------- | -------------------------------------- | -------- | -------- | -------------- | ---------- |
-| BUG-001 | API returns HTTP 200 for every outcome | Medium   | Low      | Open, upstream | 2026-10-20 |
+| ID      | Title                                                         | Severity | Priority | Status         | Reported   |
+| ------- | ------------------------------------------------------------- | -------- | -------- | -------------- | ---------- |
+| BUG-001 | Sample API errors return HTTP 200 instead of their error code | Medium   | Low      | Open, upstream | 2026-10-20 |
 
 ---
 
-## BUG-001 — API returns HTTP 200 for every outcome
+## BUG-001 — Sample API errors return HTTP 200 instead of their error code
 
-| Field       | Value                                                    |
-| ----------- | -------------------------------------------------------- |
-| Component   | `automationexercise.com` API (`/api/*`)                  |
-| Severity    | Medium                                                   |
-| Priority    | Low (third-party demo site; no fix under our control)    |
-| Environment | Public site, 2026-10-20, HTTP requests without a browser |
-| Status      | Open, upstream — workaround applied in this suite        |
+| Field       | Value                                                 |
+| ----------- | ----------------------------------------------------- |
+| Component   | `automationexercise.com` API (`/api/*`)               |
+| Severity    | Medium                                                |
+| Priority    | Low (third-party demo site; no fix under our control) |
+| Environment | Public site, 2026-10-21, Node.js `fetch`, no browser  |
+| Status      | Open, upstream — workaround applied in this suite     |
 
 ### Summary
 
-Every endpoint answers with HTTP `200 OK`, including authentication failures, missing parameters
-and unsupported methods. The real outcome only appears in the JSON body as `responseCode`.
+Reproduced on sample routes: `POST /api/verifyLogin` returns HTTP `200 OK` for invalid credentials,
+and `DELETE /api/verifyLogin` returns HTTP `200 OK` for an unsupported method. The actual outcome is
+only represented in the JSON body's `responseCode`. This report is limited to the reproduced routes;
+it does not claim every endpoint behaves identically.
 
 ### Steps to reproduce
 
@@ -60,6 +62,21 @@ The HTTP status reflects the result, so a caller can rely on the transport layer
 | `POST /api/verifyLogin` (no password)    | **200**     | `{"responseCode": 400, "message": "Bad request, email or password parameter is missing in POST request."}` |
 | `DELETE /api/verifyLogin`                | **200**     | `{"responseCode": 405, "message": "This request method is not supported."}`                                |
 | `POST /api/productsList`                 | **200**     | `{"responseCode": 405, "message": "This request method is not supported."}`                                |
+
+### Reproduction evidence (2026-10-21)
+
+Verified with Node.js `fetch` against the public site. Raw observed results:
+
+```text
+POST /api/verifyLogin with a non-existent email and wrong password
+HTTP 200; body: {"responseCode": 404, "message": "User not found!"}
+
+DELETE /api/verifyLogin
+HTTP 200; body: {"responseCode": 405, "message": "This request method is not supported."}
+```
+
+The response bodies are copied from the observed run; no account was created or modified by these
+two requests.
 
 ### Impact
 
