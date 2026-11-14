@@ -32,6 +32,9 @@ export class ProductsPage {
     await card.waitFor({ state: 'visible' });
     await card.hover();
     await card.locator('.overlay-content .add-to-cart').click();
+    if (await this.continueShoppingButton.isVisible()) {
+      await this.continueShoppingButton.click();
+    }
   }
 
   async continueShopping() {

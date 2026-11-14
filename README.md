@@ -7,7 +7,7 @@
 
 UI and API test automation for [automationexercise.com](https://automationexercise.com), built with Playwright and TypeScript.
 
-The suite covers the full purchase journey: user lifecycle (create, log in, delete), shopping cart, checkout, payment with a card, and order confirmation. Tests create unique users through the site API and attempt cleanup after each test, including when test assertions fail. Cleanup depends on the availability of this public third-party API and cannot be guaranteed during an outage.
+The live suite covers user lifecycle (create, log in, delete), cart product identity, checkout delivery address and payment navigation, payment form, and order confirmation. Tests create unique users through the site API and attempt cleanup after each live test; cleanup depends on third-party availability.
 
 ## Stack
 
@@ -75,11 +75,11 @@ The suite covers the full purchase journey: user lifecycle (create, log in, dele
 | API · Account  | `tests/Api/account.spec.ts`  | Create account with valid data (201), reject duplicate email (400), reject missing required fields (400)             |
 | API · Login    | `tests/Api/loginApi.spec.ts` | Verify login (200), wrong password (404), missing password (400), invalid email (404), missing email (400)           |
 | E2E · Login    | `tests/e2e/login.spec.ts`    | Invalid credentials show an error, empty form is blocked, valid user logs in                                         |
-| E2E · Cart     | `tests/e2e/cart.spec.ts`     | Log in, add three products selected by name, verify the cart count and product identities                            |
+| E2E · Cart     | `tests/e2e/cart.spec.ts`     | Log in, add three named products, verify identities, positive quantities and each row's price-times-quantity total   |
 | E2E · Checkout | `tests/e2e/checkout.spec.ts` | Log in, add a product, proceed to checkout, verify address details and product count, add a comment, place the order |
 | E2E · Payment  | `tests/e2e/payment.spec.ts`  | Complete the checkout, pay with a valid card, verify the order confirmation and return to the home page              |
 
-The suite contains 14 tests across 6 files. A local run passed all 14 tests against the public site, and GitHub Actions passed for commit `c025984`. CI runs the suite on pushes and pull requests.
+The main suite contains 14 live tests across 6 files. After correcting the cart-row assertion, the full online suite passed **14/14** with one worker and zero retries, including checkout address/payment navigation and row-level cart totals. Payment uses demo card data and does not process a real payment. Earlier failed runs are recorded in the [test plan](docs/test-plan.md); this result is limited to the observed demo run and does not guarantee third-party availability or production payment behavior.
 
 ## Documentation
 

@@ -3,9 +3,12 @@
 Defects found while building and running this suite. Only findings that were reproduced against
 the live site are listed; nothing here is reported from reading code alone.
 
-| ID      | Title                                                         | Severity | Priority | Status         | Reported   |
-| ------- | ------------------------------------------------------------- | -------- | -------- | -------------- | ---------- |
-| BUG-001 | Sample API errors return HTTP 200 instead of their error code | Medium   | Low      | Open, upstream | 2026-10-20 |
+This log contains only reproduced findings; regression outcomes belong in the test plan, not in the
+defect list. Results against this third-party demo describe only the observed run.
+
+| ID      | Title                                                         | Severity | Priority | Status                                   | Reported   |
+| ------- | ------------------------------------------------------------- | -------- | -------- | ---------------------------------------- | ---------- |
+| BUG-001 | Sample API errors return HTTP 200 instead of their error code | Medium   | Low      | Observed locally; not submitted upstream | 2026-10-20 |
 
 ---
 
@@ -17,7 +20,7 @@ the live site are listed; nothing here is reported from reading code alone.
 | Severity    | Medium                                                |
 | Priority    | Low (third-party demo site; no fix under our control) |
 | Environment | Public site, 2026-10-21, Node.js `fetch`, no browser  |
-| Status      | Open, upstream — workaround applied in this suite     |
+| Status      | Observed locally; not submitted upstream              |
 
 ### Summary
 
@@ -94,7 +97,7 @@ const body = JSON.parse(await response.text()) as { responseCode: number };
 expect(body.responseCode).toBe(404);
 ```
 
-The HTTP status is not asserted for API error cases, because it is always `200`.
+For the sampled error responses above, the suite checks `responseCode` in the body rather than relying on the HTTP status. Other endpoints are not characterized by this observation.
 
 ---
 

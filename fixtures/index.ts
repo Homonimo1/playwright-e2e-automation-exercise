@@ -5,7 +5,15 @@ import { CheckoutPage } from '../pages/checkout.page';
 import { LoginPage } from '../pages/login.page';
 import { PaymentPage } from '../pages/payment.page';
 import { ProductsPage } from '../pages/products.page';
-import { buildUser, buildUserForm, type User } from '../data/userFactory';
+import {
+  buildUser,
+  buildUserForm,
+  registeredAddress,
+  type RegisteredAddress,
+  type User,
+} from '../data/userFactory';
+
+type CreatedUser = User & { registeredAddress: RegisteredAddress };
 
 type Fixtures = {
   loginPage: LoginPage;
@@ -13,7 +21,7 @@ type Fixtures = {
   cartPage: CartPage;
   checkoutPage: CheckoutPage;
   paymentPage: PaymentPage;
-  createdUser: User;
+  createdUser: CreatedUser;
 };
 
 export const test = base.extend<Fixtures>({
@@ -45,17 +53,18 @@ export const test = base.extend<Fixtures>({
 
   createdUser: async ({ request }, use) => {
     const user = buildUser();
+    const form = buildUserForm(user);
 
     // Setup: create the user through the API.
     const createResponse = await request.post('/api/createAccount', {
-      form: buildUserForm(user),
+      form,
     });
     const createBody = (await createResponse.json()) as { responseCode: number };
     expect(createBody.responseCode).toBe(201);
 
     let testError: unknown;
     try {
-      await use(user);
+      await use({ ...user, registeredAddress: registeredAddress(form) });
     } catch (error) {
       testError = error;
     }

@@ -21,14 +21,14 @@ and repeatable in CI.
 
 ### In scope
 
-| Area              | What is verified                                                             |
-| ----------------- | ---------------------------------------------------------------------------- |
-| Account (API)     | Creation with valid data, duplicate email rejection, missing required fields |
-| Login (API)       | Valid login, wrong password, missing password, invalid email, missing email  |
-| Login (UI)        | Error on invalid credentials, empty form blocked, valid login                |
-| Products and cart | Adding three products selected by name, validating cart count and identities |
-| Checkout          | Delivery address and product count, comment field, order placement           |
-| Payment           | Card form, order confirmation URL and marker, return to the home page        |
+| Area              | What is verified                                                                                                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account (API)     | Creation with valid data, duplicate email rejection, missing required fields                                                                                                                                    |
+| Login (API)       | Valid login, wrong password, missing password, invalid email, missing email                                                                                                                                     |
+| Login (UI)        | Error on invalid credentials, empty form blocked, valid login                                                                                                                                                   |
+| Products and cart | Adding products with retry-safe selection; validating cart count, identities, positive quantities and each row's price-times-quantity total; no grand total assertion because the live page does not expose one |
+| Checkout          | Comparing displayed delivery address with registration data, product count, comment field, and navigation to payment                                                                                            |
+| Payment           | Card form, order confirmation URL and marker, return to the home page                                                                                                                                           |
 
 ### Out of scope
 
@@ -94,9 +94,55 @@ The API base URL is the same `baseURL` used by the UI tests.
 | UI-CHK-01    | E2E · Checkout | Places an order after filling the checkout form | `tests/e2e/checkout.spec.ts` | `@smoke` |
 | UI-PAY-01    | E2E · Payment  | Pays with a valid card and confirms the order   | `tests/e2e/payment.spec.ts`  | `@smoke` |
 
-Totals: **14 automated tests**, **14 scenarios** and **5 smoke scenarios**. Each API login scenario
+Totals: **14 online automated tests**, **14 scenarios** and **5 smoke scenarios**. Each API login scenario
 is an independent test, so a failure in one credential case does not prevent the other cases from
 running.
+
+### Reproducible test cases and observed results
+
+Run from a clean browser context with `pnpm exec playwright test --workers=1 --retries=0 --reporter=list`.
+The public demo is the target; API assertions inspect the JSON `responseCode`, not necessarily the
+HTTP status. Fixtures generate a disposable account per case where required and attempt deletion
+afterward. **Actual** below means the observed final full online run on 2026-11-14 (14/14 passed),
+not a manually witnessed outcome or a promise that the public service will always respond the same.
+No email, password or personal details from an individual run are recorded here.
+
+| ID           | Preconditions                                               | Reproduction steps (Given → When)                                                              | Expected (Then)                                                                                                            | Actual in final run                                       |
+| ------------ | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| API-ACC-01   | Unique synthetic account payload                            | Create account through `/api/createAccount`; delete it in cleanup                              | Body `responseCode: 201`                                                                                                   | Passed: 201 observed                                      |
+| API-ACC-02   | Synthetic account created for this case                     | Repeat account creation with the same email; clean up                                          | Body `responseCode: 400`                                                                                                   | Passed: 400 observed                                      |
+| API-ACC-03   | Unique email, missing required account fields               | Submit incomplete payload to `/api/createAccount`                                              | Body `responseCode: 400`                                                                                                   | Passed: 400 observed                                      |
+| API-LOG-01   | Synthetic account created for this case                     | POST valid email/password to `/api/verifyLogin`                                                | Body `responseCode: 200`                                                                                                   | Passed: 200 observed                                      |
+| API-LOG-02.1 | Synthetic account created for this case                     | POST valid email with wrong password                                                           | Body `responseCode: 404`                                                                                                   | Passed: 404 observed                                      |
+| API-LOG-02.2 | Synthetic account created for this case                     | POST valid email without password                                                              | Body `responseCode: 400`                                                                                                   | Passed: 400 observed                                      |
+| API-LOG-02.3 | Synthetic account created for this case                     | POST `invalid-email` with account password                                                     | Body `responseCode: 404`                                                                                                   | Passed: 404 observed                                      |
+| API-LOG-02.4 | Synthetic account created for this case                     | POST password without email                                                                    | Body `responseCode: 400`                                                                                                   | Passed: 400 observed                                      |
+| UI-LOG-01    | Signed-out browser                                          | Enter the invalid sample credentials in Login                                                  | Login error visible                                                                                                        | Passed: error visible                                     |
+| UI-LOG-02    | Signed-out browser, empty login fields                      | Submit the empty Login form                                                                    | Both fields report required-value validation                                                                               | Passed: both required                                     |
+| UI-LOG-03    | Synthetic account created for this case                     | Log in with its email/password                                                                 | Logged-in indicator visible                                                                                                | Passed: indicator visible                                 |
+| UI-CART-01   | Synthetic account created for this case, empty browser cart | Log in; add `Blue Top`, `Men Tshirt`, `Winter Top` by name; open cart                          | Three matching rows, positive quantities and each displayed row total equals price × quantity; **no grand total asserted** | Passed: cart assertions completed                         |
+| UI-CHK-01    | Synthetic account and one cart product                      | Log in, proceed from cart, compare registered delivery address, comment and select Place Order | One product and matching delivery fields; payment page visible                                                             | Passed: payment page visible                              |
+| UI-PAY-01    | Synthetic account and one cart product                      | Log in, proceed to payment and submit the documented **demo** card                             | Order confirmation URL/marker and return home                                                                              | Passed: confirmation and return-home assertions completed |
+
+To reproduce a single case, run `pnpm exec playwright test <file> --grep "<test title>" --workers=1
+--retries=0` with the corresponding file and title from the coverage matrix. A passing test indicates
+its assertions succeeded; it does not prove external account cleanup succeeded unless cleanup is
+separately observed.
+
+### Regression evidence (2026-11-14)
+
+The earlier full-suite run was **13/14**: the checkout delivery-address assertion failed before
+order placement. After correcting that assertion, the focused checkout recheck passed **1/1** and
+reached the demo payment page. The online regression on the older candidate later passed **14/14**
+with one worker and zero retries, before the cart quantity/total assertion was added. A subsequent
+focused cart regression passed the quantity-button and row-total checks but timed out waiting for
+`#order_total`. The live page does not expose a grand total, so only per-row price-times-quantity
+totals are asserted; no aggregate total is claimed. No offline verification is part of this suite.
+These live demo results do not guarantee third-party availability or production payment behavior.
+
+After changing the quantity locator to the live button and removing the unavailable aggregate-total
+assertion, the full online suite passed **14/14** with one worker and zero retries, including the
+per-row cart checks. The payment test uses demo card data only.
 
 ## 7. Entry and exit criteria
 
@@ -121,7 +167,7 @@ running.
 | Live third-party site, no control over data | Intermittent failures from latency    | 2 retries and 1 worker in CI; `--workers=1` locally if needed                             |
 | Shared public environment                   | Account collisions, dirty state       | Unique faker data; cleanup attempted after each test; API outages can leave residual data |
 | Single browser enabled                      | Browser-specific defects go unnoticed | Documented limitation; Firefox and WebKit ready to enable                                 |
-| API answers HTTP 200 for every outcome      | Status codes are not trustworthy      | Assertions read `responseCode` from the body (see BUG-001)                                |
+| Sample API errors use HTTP 200              | Status alone can obscure those errors | Assertions read `responseCode` from the body (see BUG-001)                                |
 | DOM hooks are not guaranteed                | Selector breakage on redesign         | `data-qa` via `testIdAttribute` plus role-based locators                                  |
 | Payment is simulated                        | No real transaction validation        | Documented as out of scope                                                                |
 
@@ -147,6 +193,8 @@ retention, so a failure can be reviewed without reproducing it locally.
 
 ## 12. Version history
 
-| Version | Date       | Change                                                  |
-| ------- | ---------- | ------------------------------------------------------- |
-| 1.0     | 2026-10-20 | First version, matching commit `de7ac7a` and suite 1.64 |
+| Version | Date       | Change                                                                |
+| ------- | ---------- | --------------------------------------------------------------------- |
+| 1.0     | 2026-10-20 | First version, matching commit `de7ac7a` and suite 1.64               |
+| 1.1     | 2026-11-13 | Clarify address, payment navigation and execution evidence            |
+| 1.2     | 2026-11-14 | Retain online-only verification and record legacy regression evidence |

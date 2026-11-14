@@ -8,7 +8,9 @@ import { fileURLToPath } from 'url';
  * https://github.com/motdotla/dotenv
  */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+if (!process.argv.includes('--list')) {
+  dotenv.config({ path: path.resolve(__dirname, '.env') });
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.

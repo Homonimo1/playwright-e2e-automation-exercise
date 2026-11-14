@@ -6,6 +6,19 @@ export type User = {
   password: string;
 };
 
+export type RegisteredAddress = Pick<
+  ReturnType<typeof buildUserForm>,
+  | 'firstname'
+  | 'lastname'
+  | 'company'
+  | 'address1'
+  | 'address2'
+  | 'country'
+  | 'state'
+  | 'city'
+  | 'zipcode'
+>;
+
 /**
  * Builds a disposable user. Every test gets its own email so runs stay independent.
  */
@@ -39,5 +52,19 @@ export function buildUserForm(user: User): Record<string, string> {
     state: 'State',
     city: faker.location.city(),
     mobile_number: '3202245566',
+  };
+}
+
+export function registeredAddress(form: Record<string, string>): RegisteredAddress {
+  return {
+    firstname: form.firstname,
+    lastname: form.lastname,
+    company: form.company,
+    address1: form.address1,
+    address2: form.address2,
+    country: form.country,
+    state: form.state,
+    city: form.city,
+    zipcode: form.zipcode,
   };
 }
