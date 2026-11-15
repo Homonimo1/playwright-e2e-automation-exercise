@@ -50,8 +50,11 @@ export class PaymentPage {
   }
 
   async verifyOrderPlaced() {
-    await expect(this.page).toHaveURL(/payment_done/);
-    await expect(this.orderPlaced).toBeVisible();
+    await expect(this.page).toHaveURL(/\/payment_done\/\d+\/?$/);
+    await expect(this.orderPlaced).toHaveText('Order Placed!');
+    await expect(
+      this.page.getByText('Congratulations! Your order has been confirmed!', { exact: true }),
+    ).toBeVisible();
   }
 
   async continueToHome() {
