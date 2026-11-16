@@ -28,7 +28,7 @@ The live suite covers user lifecycle (create, log in, delete), cart product iden
 - One user factory (`data/userFactory.ts`) shared by fixtures and API specs, so the account payload is defined once.
 - Unique test data generated with `@faker-js/faker`.
 - UI and API suites in the same project, sharing `baseURL` and configuration.
-- Payment flow asserted end to end: form heading, order confirmation URL and marker, and return to the home page.
+- Payment flow asserted end to end: form heading, dynamic order confirmation URL, visible order heading and confirmation message, and return to the home page.
 - HTML report, traces on first retry, screenshots and video on failure.
 - GitHub Actions pipeline that runs type checking, formatting and the full suite on every push and pull request.
 
@@ -41,6 +41,7 @@ The live suite covers user lifecycle (create, log in, delete), cart product iden
 │   └── userFactory.ts
 ├── docs/
 │   ├── bug-reports.md
+│   ├── manual-checkout.md
 │   └── test-plan.md
 ├── pages/
 │   ├── cart.page.ts
@@ -85,6 +86,7 @@ The main suite contains 14 live tests across 6 files. After correcting the cart-
 
 - [Test plan](docs/test-plan.md) — objective, scope, strategy, coverage matrix with scenario IDs, entry and exit criteria, and risks.
 - [Defect log](docs/bug-reports.md) — confirmed defects with reproduction steps and evidence, plus the reporting template.
+- [Browser-assisted checkout cases](docs/manual-checkout.md) — eight observed scenarios, acceptance criteria, and sanitized live-run evidence; not a human-operated manual run.
 
 ## Getting started
 
